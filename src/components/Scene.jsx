@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useLayoutEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
@@ -27,21 +27,26 @@ export default function Scene({
     (avatarMode === "procedural" ? BUNDLED_GLB_MODELS[glbModel] || BUNDLED_GLB_MODELS.bear : "");
   const isJarvis = !effectiveUrl && avatarMode === "jarvis";
   const controlsRef = useRef();
+  const jarvisTarget = [0, 1.5, 0];
+  const avatarTarget = [0, 0.8, 0];
 
   // Sempre que o avatar exibido muda (troca de modo, ou troca de modelo 3D
   // urso/papagaio/RPM), a câmera volta pro enquadramento padrão daquele avatar —
   // assim nunca fica desenquadrada por causa de um pan/zoom feito no anterior.
-  useEffect(() => {
+  // useLayoutEffect (não useEffect) garante que isso roda ANTES do primeiro frame
+  // renderizado pelos controles — com useEffect existia uma corrida onde o
+  // primeiro frame usava o alvo padrão (0,0,0) por uma fração de segundo,
+  // empurrando o Jarvis pra fora do centro.
+  useLayoutEffect(() => {
     if (!controlsRef.current) return;
     if (isJarvis) {
       controlsRef.current.object.position.set(0, 1.6, 2.6);
-      controlsRef.current.target.set(0, 1.5, 0);
     } else {
       // Enquadra o corpo inteiro do avatar 3D (pés à cabeça) de cara, sem precisar
       // arrastar. Continua dando pra ajustar manualmente depois (arraste = mover).
       controlsRef.current.object.position.set(0, 1.05, 3.3);
-      controlsRef.current.target.set(0, 0.8, 0);
     }
+    controlsRef.current.target.set(...(isJarvis ? jarvisTarget : avatarTarget));
     controlsRef.current.update();
   }, [isJarvis, effectiveUrl]);
 
@@ -87,8 +92,10 @@ export default function Scene({
       </Suspense>
       <OrbitControls
         ref={controlsRef}
+        target={isJarvis ? jarvisTarget : avatarTarget}
         enablePan={!isJarvis}
         enableRotate={!isJarvis}
+        enableZoom={!isJarvis}
         screenSpacePanning={!isJarvis}
         minDistance={isJarvis ? 1.6 : 1.2}
         maxDistance={isJarvis ? 4 : 6}

@@ -859,6 +859,7 @@
   display: flex;
   width: 100%;
   gap: 8px;
+  justify-content: center;
 }
 
 .access-form input {

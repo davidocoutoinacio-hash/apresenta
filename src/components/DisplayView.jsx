@@ -13,6 +13,7 @@ import { DEFAULT_VOICE_SETTINGS } from "../voices";
 export default function DisplayView() {
   const { isSpeaking, amplitudeRef, speak, cancel } = useNeuralVoice();
   const [authed, setAuthed] = useState(() => localStorage.getItem("magalu_authed") === "1");
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [avatarConfig, setAvatarConfig] = useState(() => ({
     avatarUrl: localStorage.getItem("avatarUrl") || "",
     avatarMode: localStorage.getItem("avatarMode") || "jarvis",
@@ -49,6 +50,26 @@ export default function DisplayView() {
   useEffect(() => {
     if (authed) send({ type: "speaking-status", isSpeaking });
   }, [authed, isSpeaking, send]);
+
+  // O comando de fala chega por mensagem entre janelas, não por um clique direto
+  // nesta aba — os navegadores bloqueiam áudio/Web Audio programático nesse caso
+  // até haver uma interação real do usuário na própria página. Esse clique único
+  // "destrava" o áudio pro resto da sessão desta janela.
+  function unlockAudio() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      ctx.resume();
+    } catch {
+      // best-effort — se falhar, o navegador pode já não precisar do desbloqueio
+    }
+    setAudioUnlocked(true);
+  }
 
   if (!authed) {
     return (
@@ -95,6 +116,29 @@ export default function DisplayView() {
           </span>
         </div>
       </header>
+
+      {!audioUnlocked && (
+        <div className="access-content">
+          <div className="access-card">
+            <div className="brand-logo access-logo">
+              <span className="brand-logo-text">magalu</span>
+              <span className="brand-logo-bar" />
+            </div>
+            <p className="access-subtitle">
+              Clique para ativar o áudio desta tela antes de compartilhar no Meet
+            </p>
+            <div className="access-form">
+              <button type="button" onClick={unlockAudio}>
+                🔊 Ativar áudio
+              </button>
+            </div>
+            <p className="access-hint">
+              Só precisa clicar uma vez — o navegador bloqueia som iniciado por
+              comando da outra janela até essa confirmação.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
