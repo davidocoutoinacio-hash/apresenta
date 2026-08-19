@@ -127,6 +127,54 @@ export function useScripts() {
     );
   }
 
+  // Roteiros só existem no localStorage deste navegador — exportar/importar é o
+  // jeito de levá-los pra outro navegador ou computador sem precisar de conta.
+  function exportScripts() {
+    const data = JSON.stringify(scripts, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `roteiros-cx-preditivo-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importScripts(jsonText) {
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonText);
+    } catch {
+      return { ok: false, error: "Arquivo não é um JSON válido." };
+    }
+    if (!Array.isArray(parsed) || !parsed.length) {
+      return { ok: false, error: "Arquivo não contém nenhum roteiro." };
+    }
+
+    const imported = parsed.map((s) => ({
+      id: uid(),
+      name: s.name || "Roteiro importado",
+      minimized: true,
+      currentIndex: 0,
+      lastPlayedId: null,
+      width: s.width || 400,
+      height: s.height || 480,
+      lines: Array.isArray(s.lines)
+        ? s.lines.map((l) => ({
+            id: uid(),
+            label: l.label || "",
+            note: l.note || "",
+            text: l.text || "",
+          }))
+        : [],
+    }));
+
+    setScripts((prev) => [...prev, ...imported]);
+    return { ok: true, count: imported.length };
+  }
+
   return {
     scripts,
     addScript,
@@ -140,5 +188,7 @@ export function useScripts() {
     setLastPlayedId,
     resizeScript,
     resetProgress,
+    exportScripts,
+    importScripts,
   };
 }

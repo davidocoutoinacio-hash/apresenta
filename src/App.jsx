@@ -49,7 +49,28 @@ export default function App() {
     setLastPlayedId,
     resizeScript,
     resetProgress,
+    exportScripts,
+    importScripts,
   } = useScripts();
+  const importInputRef = useRef(null);
+  const [importMessage, setImportMessage] = useState("");
+
+  function handleImportFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = importScripts(String(reader.result || ""));
+      setImportMessage(
+        result.ok
+          ? `${result.count} roteiro${result.count > 1 ? "s" : ""} importado${result.count > 1 ? "s" : ""}!`
+          : result.error
+      );
+      setTimeout(() => setImportMessage(""), 4000);
+    };
+    reader.readAsText(file);
+  }
   const [status, setStatus] = useState("idle"); // idle | listening | thinking | speaking | error
   const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem("avatarUrl") || "");
   const [avatarMode, setAvatarMode] = useState(
@@ -297,6 +318,27 @@ export default function App() {
           </button>
           <button
             className="settings-btn"
+            onClick={exportScripts}
+            title="Baixa todos os roteiros como arquivo .json"
+          >
+            ⬇️ Exportar
+          </button>
+          <button
+            className="settings-btn"
+            onClick={() => importInputRef.current?.click()}
+            title="Carrega roteiros de um arquivo .json exportado"
+          >
+            ⬆️ Importar
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: "none" }}
+            onChange={handleImportFile}
+          />
+          <button
+            className="settings-btn"
             onClick={() => closePanelsExcept(showVoicePanel ? null : "voice")}
           >
             Voz
@@ -312,6 +354,25 @@ export default function App() {
           </button>
         </div>
       </header>
+
+      {importMessage && (
+        <div
+          style={{
+            position: "fixed",
+            top: 72,
+            right: 20,
+            zIndex: 50,
+            background: "rgba(15, 23, 42, 0.95)",
+            color: "#fff",
+            padding: "10px 16px",
+            borderRadius: 8,
+            fontSize: 14,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+          }}
+        >
+          {importMessage}
+        </div>
+      )}
 
       {showSettings && (
         <div className="settings-panel">
