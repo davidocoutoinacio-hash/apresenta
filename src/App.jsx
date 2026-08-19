@@ -10,6 +10,7 @@ import { useNeuralVoice } from "./hooks/useNeuralVoice";
 import { useVoiceSettings } from "./hooks/useVoiceSettings";
 import { useScripts } from "./hooks/useScripts";
 import { usePresenterChannel } from "./hooks/usePresenterChannel";
+import { MonitorIcon, DownloadIcon, UploadIcon, PlayIcon, MicIcon } from "./components/Icons";
 import { VOICE_GROUPS, voiceSupportsPitch } from "./voices";
 import "./App.css";
 
@@ -310,7 +311,7 @@ export default function App() {
         </div>
         <div className="topbar-actions">
           <button className="settings-btn" onClick={openDisplayWindow}>
-            🖥️ Tela de exibição
+            <MonitorIcon /> Tela de exibição
           </button>
           <button className="settings-btn" onClick={() => addScript()}>
             + Roteiro
@@ -320,14 +321,14 @@ export default function App() {
             onClick={exportScripts}
             title="Baixa todos os roteiros como arquivo .json"
           >
-            ⬇️ Exportar
+            <DownloadIcon /> Exportar
           </button>
           <button
             className="settings-btn"
             onClick={() => importInputRef.current?.click()}
             title="Carrega roteiros de um arquivo .json exportado"
           >
-            ⬆️ Importar
+            <UploadIcon /> Importar
           </button>
           <input
             ref={importInputRef}
@@ -521,7 +522,7 @@ export default function App() {
 
           <div className="voice-panel-actions">
             <button className="script-next-btn" onClick={testVoice} disabled={status === "thinking"}>
-              ▶ Testar voz
+              <PlayIcon size={14} /> Testar voz
             </button>
             <button className="script-reset-btn" onClick={resetVoiceSettings}>
               Restaurar padrão
@@ -583,7 +584,11 @@ export default function App() {
           {status === "listening" && "Ouvindo…"}
           {status === "thinking" && "Pensando…"}
           {status === "speaking" && "Falando (toque p/ parar)"}
-          {(status === "idle" || status === "error") && "🎤 Perguntar"}
+          {(status === "idle" || status === "error") && (
+            <>
+              <MicIcon /> Perguntar
+            </>
+          )}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { PlayIcon, TrashIcon } from "./Icons";
 
 const MIN_WIDTH = 280;
 const MIN_HEIGHT = 200;
@@ -144,7 +145,13 @@ export default function ScriptPanel({
             onClick={() => nextLine && onPlayLine(nextLine, nextIndex)}
             disabled={status === "thinking" || !nextLine || !nextLine.text.trim()}
           >
-            {nextLine ? `▶ Próxima fala (${nextIndex + 1}/${total})` : "Roteiro concluído"}
+            {nextLine ? (
+              <>
+                <PlayIcon size={14} /> Próxima fala ({nextIndex + 1}/{total})
+              </>
+            ) : (
+              "Roteiro concluído"
+            )}
           </button>
           <button className="script-reset-btn" onClick={onResetProgress}>
             Reiniciar
@@ -170,14 +177,14 @@ export default function ScriptPanel({
                   disabled={status === "thinking" || !line.text.trim()}
                   title="Falar essa frase"
                 >
-                  ▶
+                  <PlayIcon size={14} />
                 </button>
                 <button
                   className="editable-line-remove"
                   onClick={() => onRemoveLine(line.id)}
                   title="Remover frase"
                 >
-                  🗑
+                  <TrashIcon size={14} />
                 </button>
               </div>
               <input

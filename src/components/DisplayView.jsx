@@ -4,6 +4,7 @@ import SpeakingBubble from "./SpeakingBubble";
 import AccessScreen from "./AccessScreen";
 import { useNeuralVoice } from "../hooks/useNeuralVoice";
 import { usePresenterChannel } from "../hooks/usePresenterChannel";
+import { SpeakerIcon } from "./Icons";
 
 // Tela de exibição: só o avatar falando, sem nenhum controle — pensada pra ser a
 // janela/aba compartilhada no Google Meet. Recebe comandos ("fale isso", "pare",
@@ -127,7 +128,7 @@ export default function DisplayView() {
             </p>
             <div className="access-form">
               <button type="button" onClick={unlockAudio}>
-                🔊 Ativar áudio
+                <SpeakerIcon /> Ativar áudio
               </button>
             </div>
             <p className="access-hint">

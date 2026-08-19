@@ -229,6 +229,9 @@
 }
 
 .settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: rgba(148, 163, 184, 0.15);
   border: 1px solid rgba(148, 163, 184, 0.3);
   color: #e2e8f0;
@@ -340,6 +343,10 @@
 }
 
 .script-next-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   flex: 1;
   background: rgba(34, 197, 94, 0.18);
   border: 1px solid rgba(34, 197, 94, 0.4);
@@ -603,6 +610,9 @@
 
 .editable-line-play,
 .editable-line-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 30px;
   height: 30px;
   flex-shrink: 0;
@@ -771,6 +781,10 @@
 }
 
 .mic-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-width: 200px;
   padding: 14px 28px;
   border-radius: 999px;
@@ -884,6 +898,10 @@
 }
 
 .access-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: linear-gradient(90deg, #ffa733, #ff2d95 45%, #5b7cfa 75%, #38d4ff);
   border: none;
   color: #0b1220;
