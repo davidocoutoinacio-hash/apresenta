@@ -18,10 +18,20 @@ export default function ScriptPanel({
   onResetProgress,
   onResize,
 }) {
-  const [pos, setPos] = useState(() => ({
-    x: 90 + (index % 3) * 36,
-    y: 90 + (index % 4) * 32,
-  }));
+  const [pos, setPos] = useState(() => {
+    // O CSS limita a largura/altura renderizada a 90vw/85vh (mesmas contas
+    // aqui) — sem clampar também a posição inicial, um painel podia nascer
+    // com a borda direita/inferior fora da tela em celulares, inacessível
+    // sem arrastar primeiro.
+    const effectiveWidth = Math.min(script.width || 400, window.innerWidth * 0.9);
+    const effectiveHeight = Math.min(script.height || 480, window.innerHeight * 0.85);
+    const maxX = Math.max(12, window.innerWidth - effectiveWidth - 12);
+    const maxY = Math.max(12, window.innerHeight - effectiveHeight - 12);
+    return {
+      x: Math.min(90 + (index % 3) * 36, maxX),
+      y: Math.min(90 + (index % 4) * 32, maxY),
+    };
+  });
   const [size, setSize] = useState(() => ({
     width: script.width || 400,
     height: script.height || 480,

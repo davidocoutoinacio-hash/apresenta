@@ -172,6 +172,22 @@
   gap: 8px;
 }
 
+.topbar-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.topbar-menu-btn:hover {
+  background: rgba(148, 163, 184, 0.28);
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -822,8 +838,46 @@
   50% { box-shadow: 0 0 0 14px rgba(56, 189, 248, 0); }
 }
 
+/* Telas de celular/tablet estreito: a barra superior tem botões demais pra
+   caber numa linha só, então colapsa num menu hambúrguer com dropdown. */
+@media (max-width: 780px) {
+  .topbar-menu-btn {
+    display: flex;
+  }
+
+  .topbar-actions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 24px;
+    margin-top: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: min(260px, calc(100vw - 32px));
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.97);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    z-index: 30;
+  }
+  .topbar-actions.open {
+    display: flex;
+  }
+  .topbar-actions .settings-btn {
+    width: 100%;
+  }
+}
+
 @media (max-width: 520px) {
   .suggestions { bottom: 118px; }
+
+  .brand-logo-text { font-size: 18px; }
+  .brand-assistant-name { padding-left: 12px; font-size: 12px; }
+  .topbar { padding: 14px 16px; }
+
+  .settings-panel, .voice-panel { right: 16px; top: 60px; }
 }
 
 /* Tela de acesso (código pré-definido, sem login comum) */

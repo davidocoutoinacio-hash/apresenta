@@ -10,7 +10,15 @@ import { useNeuralVoice } from "./hooks/useNeuralVoice";
 import { useVoiceSettings } from "./hooks/useVoiceSettings";
 import { useScripts } from "./hooks/useScripts";
 import { usePresenterChannel } from "./hooks/usePresenterChannel";
-import { MonitorIcon, DownloadIcon, UploadIcon, PlayIcon, MicIcon } from "./components/Icons";
+import {
+  MonitorIcon,
+  DownloadIcon,
+  UploadIcon,
+  PlayIcon,
+  MicIcon,
+  MenuIcon,
+  CloseIcon,
+} from "./components/Icons";
 import { VOICE_GROUPS, voiceSupportsPitch } from "./voices";
 import "./App.css";
 
@@ -80,6 +88,7 @@ export default function App() {
   const [glbModel, setGlbModel] = useState(() => localStorage.getItem("glbModel") || "bear");
   const [showSettings, setShowSettings] = useState(false);
   const [showVoicePanel, setShowVoicePanel] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [authed, setAuthed] = useState(
     () => localStorage.getItem("magalu_authed") === "1"
   );
@@ -309,7 +318,17 @@ export default function App() {
             Rogéria · IA LAB
           </span>
         </div>
-        <div className="topbar-actions">
+        <button
+          className="topbar-menu-btn"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+        >
+          {menuOpen ? <CloseIcon /> : <MenuIcon />}
+        </button>
+        <div
+          className={`topbar-actions ${menuOpen ? "open" : ""}`}
+          onClick={() => setMenuOpen(false)}
+        >
           <button className="settings-btn" onClick={openDisplayWindow}>
             <MonitorIcon /> Tela de exibição
           </button>
