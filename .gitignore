@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.DS_Store
+*.log
+
+# Segurança extra: nenhum .env deve ser versionado, em nenhuma pasta do projeto
+# (cada subpasta já tem seu próprio .gitignore cobrindo isso também).
+.env
+.env.*
+!.env.example
