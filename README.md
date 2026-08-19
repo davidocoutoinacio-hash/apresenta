@@ -1,20 +1,63 @@
-# CX Preditivo · IA LAB
+# 🎙️ Rogéria — CX Preditivo · IA LAB
 
-Assistente de IA com avatar 3D animado que responde por voz perguntas sobre o tema
-**CX Preditivo**. Feito com Three.js (React Three Fiber), Web Speech API (voz gratuita,
-nativa do navegador) e Groq (LLM gratuito e rápido) via um backend Node/Express.
+**Assistente de IA com avatar 3D animado e voz neural, feita pra apresentar o tema
+_CX Preditivo_ ao vivo** — responde por voz, tem roteiro editável e um modo de
+apresentação de duas telas pensado pra compartilhar no Google Meet.
 
-## Estrutura
+<p>
+  <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=0b1220&labelColor=0b1220">
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=fff&labelColor=0b1220">
+  <img alt="Three.js" src="https://img.shields.io/badge/Three.js-r1-black?logo=threedotjs&logoColor=fff&labelColor=0b1220">
+  <img alt="Node" src="https://img.shields.io/badge/Node-Express-339933?logo=node.js&logoColor=fff&labelColor=0b1220">
+  <img alt="Groq" src="https://img.shields.io/badge/LLM-Groq-F55036?labelColor=0b1220">
+  <img alt="Google Cloud TTS" src="https://img.shields.io/badge/Voz-Google_Cloud_TTS-4285F4?logo=googlecloud&logoColor=fff&labelColor=0b1220">
+  <img alt="Custo" src="https://img.shields.io/badge/Custo-100%25_gratuito-22c55e?labelColor=0b1220">
+</p>
+
+---
+
+## ✨ O que tem aqui
+
+- **🧑‍🎨 Três estilos de avatar 3D**, trocáveis na hora: um holograma tipo wireframe
+  (Jarvis-style, com partículas e ondulação reativa ao som), um urso e um papagaio 3D
+  — ou cole a URL de um avatar humano criado no [Ready Player Me](https://readyplayer.me).
+- **🗣️ Voz neural gratuita**: mais de 40 vozes do Google Cloud TTS (Chirp3-HD, Neural2,
+  Wavenet, Standard), com tom, velocidade, pausas e um **sotaque mineiro opcional**
+  ajustáveis direto pela interface — cai pra voz nativa do navegador se faltar a chave.
+- **🎙️ Conversa por voz ou texto**: pergunta pelo microfone (Web Speech API) ou clica
+  numa sugestão, a resposta vem da Groq (LLM gratuito e rápido) e é narrada pelo avatar,
+  com a boca sincronizada à amplitude real do áudio.
+- **📜 Roteiros editáveis**: crie quantos roteiros quiser, com falas editáveis linha a
+  linha. Minimizados, viram ícones orbitando o avatar; clicados, abrem como painéis
+  flutuantes e redimensionáveis.
+- **🖥️ Modo apresentação de duas telas**: uma janela de **controle** (roteiros,
+  configurações, microfone) e uma janela de **exibição**, só com o avatar — é essa
+  que você compartilha no Google Meet, enquanto comanda tudo pela outra.
+- **🔒 Acesso protegido de verdade**: login por código com sessão assinada
+  (HMAC + expiração), limite de tentativas, e as rotas de IA recusam qualquer chamada
+  sem sessão válida — não é só uma tela, a API inteira é protegida.
+- **💸 Gratuito de ponta a ponta**: Groq, Google Cloud TTS, Render e Vercel — todo
+  mundo tem camada gratuita generosa o suficiente pra isso.
+
+## 📁 Estrutura
 
 ```
 apresenta/
-  src/, public/, index.html, package.json  -> App React + Three.js (avatar 3D, mic, fala) — deploy no Vercel (raiz do repositório)
-  server/                                  -> API Node/Express que consulta a Groq com o conteúdo de CX Preditivo — deploy no Render
+  src/, public/, index.html, package.json   → front-end (React + Three.js) — raiz do repo, deploy no Vercel
+  server/                                   → API Node/Express (Groq + Google TTS + auth) — deploy no Render
+  DEPLOY.md                                 → checklist passo a passo de deploy
 ```
 
-O front-end fica na **raiz** do repositório (não numa subpasta) — assim o Vercel detecta o projeto Vite automaticamente, sem precisar configurar "Root Directory". Só o backend fica isolado em `server/`.
+O front-end fica na **raiz** do repositório (não numa subpasta), então o Vercel
+detecta o projeto Vite sozinho, sem precisar configurar "Root Directory". Só o
+backend fica isolado em `server/`.
 
-## 1. Rodando localmente
+## 🚀 Deploy
+
+Checklist completo (Render + Vercel, todas as variáveis de ambiente, ordem certa
+pra evitar ida-e-volta) está em **[`DEPLOY.md`](./DEPLOY.md)**.
+
+## 🧑‍💻 Rodando localmente
 
 ### Backend
 
@@ -36,7 +79,8 @@ curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer SUA_CHAV
 
 e ajuste `GROQ_MODEL` no `.env` se necessário (padrão: `openai/gpt-oss-120b`).
 
-#### Voz neural (opcional, recomendado)
+<details>
+<summary><strong>Voz neural (opcional, recomendado)</strong></summary>
 
 Sem essa chave, a fala usa a voz nativa do navegador (gratuita, porém mais robótica).
 Com ela, a resposta é narrada por uma voz neural do Google, muito mais humana — e o app
@@ -52,9 +96,11 @@ cai de volta na voz do navegador automaticamente se a chave faltar ou a chamada 
 
 As variáveis `GOOGLE_TTS_VOICE`, `GOOGLE_TTS_PITCH`, `GOOGLE_TTS_RATE`,
 `GOOGLE_TTS_SENTENCE_PAUSE_MS`, `GOOGLE_TTS_COMMA_PAUSE_MS` e `MINEIRO_ACCENT` no `.env`
-são apenas os **valores padrão do servidor** — o card "Voz" na interface (ver seção 3)
-permite escolher a voz e ajustar tudo isso direto pelo navegador, com override por
+são apenas os **valores padrão do servidor** — o card "Voz" na interface permite
+escolher a voz e ajustar tudo isso direto pelo navegador, com override por
 requisição, sem precisar mexer no `.env` nem reiniciar o backend.
+
+</details>
 
 ### Frontend
 
@@ -68,86 +114,65 @@ npm run dev
 Abra o endereço mostrado (geralmente http://localhost:5173) no **Chrome** — é o navegador
 com melhor suporte à Web Speech API em português.
 
-## 2. Avatar 3D
+## 🧑‍🎨 Avatar 3D
 
-Por padrão o app usa um avatar 3D procedural (cabeça com textura de pele gerada, olhos,
-piscar, boca sincronizada com a fala) — funciona sem nenhuma configuração extra.
+Clique em **"Configurar avatar"** na barra superior:
 
-Para usar um avatar humano realista com textura completa:
+- **Holograma (Jarvis)**: wireframe geodésico com partículas, reage à voz sem precisar
+  de nenhum modelo externo.
+- **Avatar 3D**: escolha entre **urso** e **papagaio** (modelos prontos, já inclusos em
+  `public/models/`), com animação de corpo inteiro (balanço, dança espontânea, reação
+  ao clique) e uma aura de partículas coloridas ao redor.
+- **Ready Player Me**: cole a URL `.glb` de um avatar humano criado gratuitamente em
+  [readyplayer.me](https://readyplayer.me) — vem com blend shapes de boca e olho,
+  sincronizados automaticamente com a fala.
 
-1. Acesse https://readyplayer.me e crie um avatar gratuito (personalize rosto, roupa, etc).
-2. Copie a URL do arquivo `.glb` do avatar (ex: `https://models.readyplayer.me/SEU_ID.glb`).
-3. No app, clique em **"Configurar avatar"** (canto superior direito) e cole a URL.
-
-O avatar RPM já vem com blend shapes (visemes) de boca, que o app usa automaticamente para
-sincronizar a fala.
-
-## 3. Como funciona a conversa por voz
+## 🗣️ Como funciona a conversa por voz
 
 - **Ouvir**: `SpeechRecognition` do navegador (gratuito, pt-BR).
 - **Responder**: a pergunta vai para `POST /api/ask` no backend, que injeta o conteúdo de
   CX Preditivo como contexto (`server/knowledge.js`) e chama a Groq (`openai/gpt-oss-120b`,
   tier gratuito).
 - **Falar**: o texto vai para `POST /api/tts` no backend, que gera áudio com uma voz
-  neural do Google (`GOOGLE_TTS_API_KEY`); sem essa chave, cai automaticamente para a
-  `SpeechSynthesis` do navegador. Em ambos os casos o avatar sincroniza a boca com a
-  amplitude real do áudio enquanto fala (análise em tempo real via Web Audio API).
+  neural do Google; sem chave configurada, cai automaticamente para a `SpeechSynthesis`
+  do navegador. Em ambos os casos o avatar sincroniza a boca/reação com a amplitude
+  real do áudio (análise em tempo real via Web Audio API).
 
 Para atualizar o conteúdo sobre o qual a IA responde, edite `server/knowledge.js`.
 
 ### Configurar a voz pela interface
 
-Clique em **"Voz"** na barra superior do app para abrir o card de configuração:
+Clique em **"Voz"** na barra superior para abrir o card de configuração: mais de 40
+vozes gratuitas do Google, tom, velocidade, pausa entre frases/vírgulas, sotaque
+mineiro (liga/desliga) e um botão **"Testar voz"**. Tudo fica salvo no navegador.
 
-- **Voz**: mais de 40 opções gratuitas do Google (Chirp3-HD, Neural2, Wavenet e Standard).
-- **Tom (pitch)**, **velocidade**, **pausa entre frases** e **pausa em vírgulas**.
-- **Sotaque mineiro** (liga/desliga o dicionário de `server/mineiro.js`).
-- Botão **"Testar voz"** para ouvir a combinação atual na hora.
+## 📜 Roteiros
 
-Tudo fica salvo no `localStorage` do navegador — persiste mesmo fechando e reabrindo o app.
-As vozes Chirp3-HD (mais novas e naturais) não aceitam ajuste de tom; o campo fica desabilitado
-automaticamente quando uma delas é selecionada. Historicamente as vozes Standard têm a cota
-gratuita mais alta e Neural2/Wavenet uma cota menor e compartilhada — mas não confirmamos o
-valor exato para Chirp3-HD (é uma categoria nova), então antes de um uso intenso vale checar a
-cota atual em https://cloud.google.com/text-to-speech/pricing.
+Clique em **"+ Roteiro"** pra criar um roteiro novo, com frases editáveis (rótulo,
+nota de contexto e o texto que a IA vai falar). Minimizado, cada roteiro vira um
+ícone orbitando o avatar — clique pra abrir como painel flutuante, arrastável e
+redimensionável. O botão **"▶ Próxima fala"** avança sequencialmente pelas falas.
 
-## 4. Deploy gratuito (Render + Vercel)
+## 🖥️ Apresentação em duas telas
 
-### Backend no Render
+Pensado pra apresentar ao vivo (Google Meet, palco, etc.) sem que a plateia veja
+seus controles:
 
-1. Suba este repositório no GitHub.
-2. No Render, crie um **Web Service** apontando para a pasta `server/`.
-   - Build command: `npm install`
-   - Start command: `npm start`
-3. Em Environment, adicione **todas** as variáveis abaixo (sem elas o servidor recusa
-   iniciar o login ou fica com a API aberta pra qualquer origem):
-   - `GROQ_API_KEY` (sua chave) e, opcionalmente, `GROQ_MODEL`.
-   - Para voz neural: `GOOGLE_TTS_API_KEY` e `GOOGLE_TTS_VOICE`.
-   - `ACCESS_CODE` — o código que as pessoas vão digitar pra entrar. **Obrigatório**:
-     sem essa variável, o login fica bloqueado (não há mais valor padrão no código).
-   - `SESSION_SECRET` — string aleatória usada pra assinar a sessão de quem já
-     logou. Gere uma com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
-   - `ALLOWED_ORIGIN` — a URL do seu front-end no Vercel (ex:
-     `https://seu-app.vercel.app`). Sem essa variável, **qualquer site** pode chamar
-     sua API.
-4. Anote a URL pública gerada (ex: `https://cx-preditivo-api.onrender.com`).
+- **Janela de controle** (URL normal): roteiros, configurações, microfone — fica com
+  você.
+- **Janela de exibição** (mesma URL + `?display=1`): só o avatar, sem nenhum controle
+  — é essa que você compartilha na chamada.
 
-> No plano free do Render o serviço "dorme" após alguns minutos sem uso — a primeira
-> pergunta após um tempo ocioso pode demorar alguns segundos a mais para responder.
+Abra pelo botão **"🖥️ Tela de exibição"** no topo do painel de controle. As duas
+janelas precisam estar abertas no mesmo navegador, no mesmo computador — a
+comunicação entre elas é local (`BroadcastChannel`), não passa pela internet. Na
+primeira vez, a tela de exibição pede um clique único pra desbloquear o áudio
+(exigência dos navegadores para som iniciado por outra janela).
 
-### Frontend no Vercel
+## 🔒 Como funciona a proteção por código de acesso
 
-1. Importe o mesmo repositório no Vercel — o front-end fica na raiz do repositório,
-   então não precisa configurar "Root Directory" (deixe `./`).
-2. Em Environment Variables, adicione `VITE_API_URL` com a URL do backend no Render.
-3. Deploy. O Vercel detecta automaticamente o projeto Vite (`npm run build`, saída em `dist/`).
-4. Volte no Render e confira se `ALLOWED_ORIGIN` bate exatamente com a URL que o
-   Vercel gerou (protocolo + domínio, sem barra no final).
-
-### Como funciona a proteção por código de acesso
-
-A tela de login (`AccessScreen.jsx`) não é a única barreira — ela só decide se o
-front-end mostra o chat ou não. Quem realmente protege as rotas de IA é o backend:
+A tela de login não é a única barreira — ela só decide se o front-end mostra o chat
+ou não. Quem realmente protege as rotas de IA é o backend:
 
 - `POST /api/auth/verify` confere o código contra `ACCESS_CODE` e, se bater, devolve
   um token assinado (válido por 12h).
@@ -156,12 +181,15 @@ front-end mostra o chat ou não. Quem realmente protege as rotas de IA é o back
   API recusa com `401`, mesmo que a pessoa nunca tenha passado pela tela de login.
 - `/api/auth/verify` tem limite de 8 tentativas a cada 15 minutos por IP, e
   `/api/ask`/`/api/tts` têm limite de 30 requisições por minuto por IP.
+- CORS restrito ao domínio configurado em `ALLOWED_ORIGIN`.
 
 Isso significa que ninguém consegue usar sua IA/voz (e consumir sua cota paga) só
 copiando a URL pública do backend — precisa primeiro passar pelo código.
 
-## 5. Personalizações rápidas
+## 🎨 Personalizações rápidas
 
 - Trocar as perguntas sugeridas: `src/App.jsx` → array `SUGGESTIONS`.
 - Ajustar tom/estilo das respostas: `server/knowledge.js` → `SYSTEM_CONTEXT`.
-- Trocar a cor de pele/textura do avatar procedural: `src/utils/skinTexture.js`.
+- Dicionário do sotaque mineiro: `server/mineiro.js`.
+- Trocar/adicionar avatares 3D prontos: `public/models/` + `src/components/Scene.jsx`
+  → `BUNDLED_GLB_MODELS`.
