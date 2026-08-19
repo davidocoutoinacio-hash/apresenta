@@ -34,7 +34,7 @@ export default function App() {
   }
 
   const { isListening, supported, listen } = useVoice();
-  const { isSpeaking, amplitudeRef, speak, cancel: cancelSpeaking } = useNeuralVoice();
+  const { isSpeaking, amplitudeRef, speak, speakDemo, cancel: cancelSpeaking } = useNeuralVoice();
   const { voiceSettings, updateVoiceSettings, resetVoiceSettings } = useVoiceSettings();
   const {
     scripts,
@@ -258,8 +258,7 @@ export default function App() {
       <AccessScreen
         isSpeaking={isSpeaking}
         amplitudeRef={amplitudeRef}
-        speak={speak}
-        voiceSettings={voiceSettings}
+        speakDemo={speakDemo}
         onUnlock={() => {
           localStorage.setItem("magalu_authed", "1");
           setAuthed(true);

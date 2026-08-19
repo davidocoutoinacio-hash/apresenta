@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import "dotenv/config";
 import { SYSTEM_CONTEXT } from "./knowledge.js";
 import { applyMineiroAccent } from "./mineiro.js";
+import { ROGERIA_ACCESS_PHRASES } from "./accessPhrases.js";
 
 const app = express();
 
@@ -177,6 +178,37 @@ function toSSML(text, sentencePauseMs, commaPauseMs) {
   return `<speak>${withPauses}</speak>`;
 }
 
+async function synthesizeSpeech({ text, voice, pitch, rate, sentencePauseMs, commaPauseMs, mineiroAccent }) {
+  const spokenText = mineiroAccent ? applyMineiroAccent(text) : text;
+
+  const audioConfig = { audioEncoding: "MP3", speakingRate: rate };
+  if (voiceSupportsPitch(voice)) {
+    audioConfig.pitch = pitch;
+  }
+
+  const ttsRes = await fetch(
+    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${process.env.GOOGLE_TTS_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: { ssml: toSSML(spokenText, sentencePauseMs, commaPauseMs) },
+        voice: { languageCode: "pt-BR", name: voice },
+        audioConfig,
+      }),
+    }
+  );
+
+  if (!ttsRes.ok) {
+    const errBody = await ttsRes.text();
+    console.error("Erro Google TTS:", ttsRes.status, errBody);
+    throw new Error("tts_failed");
+  }
+
+  const data = await ttsRes.json();
+  return data.audioContent;
+}
+
 app.post("/api/tts", requireSession, apiLimiter, async (req, res) => {
   const text = (req.body?.text || "").toString().trim();
 
@@ -212,37 +244,56 @@ app.post("/api/tts", requireSession, apiLimiter, async (req, res) => {
   );
   const mineiroAccent = req.body?.mineiroAccent !== undefined ? Boolean(req.body.mineiroAccent) : MINEIRO_ACCENT;
 
-  const spokenText = mineiroAccent ? applyMineiroAccent(text) : text;
+  try {
+    const audioContent = await synthesizeSpeech({
+      text,
+      voice,
+      pitch,
+      rate,
+      sentencePauseMs,
+      commaPauseMs,
+      mineiroAccent,
+    });
+    res.json({ audioContent });
+  } catch {
+    res.status(502).json({ error: "Falha ao gerar áudio." });
+  }
+});
 
-  const audioConfig = { audioEncoding: "MP3", speakingRate: rate };
-  if (voiceSupportsPitch(voice)) {
-    audioConfig.pitch = pitch;
+// Demo de voz da tela de login (antes do código de acesso) — sem sessão, então
+// NUNCA aceita texto livre: só um índice pra uma frase fixa de accessPhrases.js,
+// sempre com a voz/config padrão da Rogéria. Isso deixa a pessoa ouvir a voz de
+// verdade antes de entrar, sem abrir uma rota de TTS de texto arbitrário sem auth.
+const demoLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas requisições em pouco tempo. Aguarde um instante." },
+});
+
+app.post("/api/tts-demo", demoLimiter, async (req, res) => {
+  const index = Number(req.body?.phraseIndex);
+
+  if (!Number.isInteger(index) || index < 0 || index >= ROGERIA_ACCESS_PHRASES.length) {
+    return res.status(400).json({ error: "phraseIndex inválido." });
+  }
+  if (!process.env.GOOGLE_TTS_API_KEY) {
+    return res.status(500).json({ error: "GOOGLE_TTS_API_KEY não configurada no servidor." });
   }
 
   try {
-    const ttsRes = await fetch(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${process.env.GOOGLE_TTS_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          input: { ssml: toSSML(spokenText, sentencePauseMs, commaPauseMs) },
-          voice: { languageCode: "pt-BR", name: voice },
-          audioConfig,
-        }),
-      }
-    );
-
-    if (!ttsRes.ok) {
-      const errBody = await ttsRes.text();
-      console.error("Erro Google TTS:", ttsRes.status, errBody);
-      return res.status(502).json({ error: "Falha ao gerar áudio." });
-    }
-
-    const data = await ttsRes.json();
-    res.json({ audioContent: data.audioContent });
-  } catch (err) {
-    console.error("Erro ao chamar Google TTS:", err);
+    const audioContent = await synthesizeSpeech({
+      text: ROGERIA_ACCESS_PHRASES[index],
+      voice: GOOGLE_TTS_VOICE,
+      pitch: GOOGLE_TTS_PITCH,
+      rate: GOOGLE_TTS_RATE,
+      sentencePauseMs: GOOGLE_TTS_SENTENCE_PAUSE_MS,
+      commaPauseMs: GOOGLE_TTS_COMMA_PAUSE_MS,
+      mineiroAccent: false,
+    });
+    res.json({ audioContent });
+  } catch {
     res.status(502).json({ error: "Falha ao gerar áudio." });
   }
 });

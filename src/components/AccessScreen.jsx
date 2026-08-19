@@ -4,14 +4,14 @@ import { ROGERIA_ACCESS_PHRASES } from "../rogeriaPhrases";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-export default function AccessScreen({ isSpeaking, amplitudeRef, speak, voiceSettings, onUnlock }) {
+export default function AccessScreen({ isSpeaking, amplitudeRef, speakDemo, onUnlock }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const lastPhraseIndexRef = useRef(-1);
 
-  function pickPhrase() {
-    if (ROGERIA_ACCESS_PHRASES.length === 1) return ROGERIA_ACCESS_PHRASES[0];
+  function pickPhraseIndex() {
+    if (ROGERIA_ACCESS_PHRASES.length === 1) return 0;
 
     let index;
     do {
@@ -19,12 +19,13 @@ export default function AccessScreen({ isSpeaking, amplitudeRef, speak, voiceSet
     } while (index === lastPhraseIndexRef.current);
 
     lastPhraseIndexRef.current = index;
-    return ROGERIA_ACCESS_PHRASES[index];
+    return index;
   }
 
   function handleAvatarActivate() {
     if (isSpeaking) return;
-    speak(pickPhrase(), voiceSettings);
+    const index = pickPhraseIndex();
+    speakDemo(index, ROGERIA_ACCESS_PHRASES[index]);
   }
 
   async function handleSubmit(event) {

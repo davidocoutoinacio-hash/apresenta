@@ -68,6 +68,51 @@ export function useNeuralVoice() {
     });
   }, []);
 
+  const playAudioContent = useCallback(async (audioContent) => {
+    if (!audioContent) throw new Error("tts_empty");
+
+    const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+    audioElRef.current = audio;
+
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const ctx = audioCtxRef.current;
+    if (ctx.state === "suspended") await ctx.resume();
+
+    const source = ctx.createMediaElementSource(audio);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    const freqData = new Uint8Array(analyser.frequencyBinCount);
+    const tick = () => {
+      analyser.getByteFrequencyData(freqData);
+      const avg = freqData.reduce((a, b) => a + b, 0) / freqData.length;
+      amplitudeRef.current = Math.min(1, avg / 90);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    return await new Promise((resolve) => {
+      const finish = () => {
+        setIsSpeaking(false);
+        stopAnalyser();
+        activeFinishRef.current = null;
+        resolve();
+      };
+      activeFinishRef.current = finish;
+
+      audio.onplay = () => {
+        setIsSpeaking(true);
+        tick();
+      };
+      audio.onended = finish;
+      audio.onerror = finish;
+      audio.play().catch(finish);
+    });
+  }, []);
+
   const speak = useCallback(
     async (text, voiceSettings) => {
       if (!text) return;
@@ -84,48 +129,7 @@ export function useNeuralVoice() {
         if (!res.ok) throw new Error("tts_unavailable");
 
         const { audioContent } = await res.json();
-        if (!audioContent) throw new Error("tts_empty");
-
-        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-        audioElRef.current = audio;
-
-        if (!audioCtxRef.current) {
-          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        const ctx = audioCtxRef.current;
-        if (ctx.state === "suspended") await ctx.resume();
-
-        const source = ctx.createMediaElementSource(audio);
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 256;
-        source.connect(analyser);
-        analyser.connect(ctx.destination);
-
-        const freqData = new Uint8Array(analyser.frequencyBinCount);
-        const tick = () => {
-          analyser.getByteFrequencyData(freqData);
-          const avg = freqData.reduce((a, b) => a + b, 0) / freqData.length;
-          amplitudeRef.current = Math.min(1, avg / 90);
-          rafRef.current = requestAnimationFrame(tick);
-        };
-
-        return await new Promise((resolve) => {
-          const finish = () => {
-            setIsSpeaking(false);
-            stopAnalyser();
-            activeFinishRef.current = null;
-            resolve();
-          };
-          activeFinishRef.current = finish;
-
-          audio.onplay = () => {
-            setIsSpeaking(true);
-            tick();
-          };
-          audio.onended = finish;
-          audio.onerror = finish;
-          audio.play().catch(finish);
-        });
+        return await playAudioContent(audioContent);
       } catch (err) {
         console.warn(
           "TTS neural indisponível, usando voz do navegador como alternativa:",
@@ -134,7 +138,34 @@ export function useNeuralVoice() {
         return browserSpeak(text);
       }
     },
-    [browserSpeak]
+    [browserSpeak, playAudioContent]
+  );
+
+  // Versão pré-login (tela de acesso, sem sessão ainda): usa a rota restrita
+  // /api/tts-demo, que só aceita o índice de uma frase fixa — nunca texto livre —
+  // pra tocar a voz de verdade da Rogéria sem precisar abrir /api/tts sem auth.
+  // `fallbackText` é só pro fallback de voz do navegador, se a API falhar.
+  const speakDemo = useCallback(
+    async (phraseIndex, fallbackText) => {
+      try {
+        const res = await fetch(`${API_URL}/api/tts-demo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phraseIndex }),
+        });
+        if (!res.ok) throw new Error("tts_demo_unavailable");
+
+        const { audioContent } = await res.json();
+        return await playAudioContent(audioContent);
+      } catch (err) {
+        console.warn(
+          "TTS neural indisponível (demo), usando voz do navegador como alternativa:",
+          err.message
+        );
+        return browserSpeak(fallbackText);
+      }
+    },
+    [browserSpeak, playAudioContent]
   );
 
   const cancel = useCallback(() => {
@@ -148,5 +179,5 @@ export function useNeuralVoice() {
     }
   }, []);
 
-  return { isSpeaking, amplitudeRef, speak, browserSpeak, cancel };
+  return { isSpeaking, amplitudeRef, speak, speakDemo, browserSpeak, cancel };
 }

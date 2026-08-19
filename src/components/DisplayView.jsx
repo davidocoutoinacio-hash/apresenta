@@ -4,14 +4,13 @@ import SpeakingBubble from "./SpeakingBubble";
 import AccessScreen from "./AccessScreen";
 import { useNeuralVoice } from "../hooks/useNeuralVoice";
 import { usePresenterChannel } from "../hooks/usePresenterChannel";
-import { DEFAULT_VOICE_SETTINGS } from "../voices";
 
 // Tela de exibição: só o avatar falando, sem nenhum controle — pensada pra ser a
 // janela/aba compartilhada no Google Meet. Recebe comandos ("fale isso", "pare",
 // "troque de avatar") da janela de controle via BroadcastChannel e reporta de
 // volta quando começa/termina de falar.
 export default function DisplayView() {
-  const { isSpeaking, amplitudeRef, speak, cancel } = useNeuralVoice();
+  const { isSpeaking, amplitudeRef, speak, speakDemo, cancel } = useNeuralVoice();
   const [authed, setAuthed] = useState(() => localStorage.getItem("magalu_authed") === "1");
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [avatarConfig, setAvatarConfig] = useState(() => ({
@@ -76,8 +75,7 @@ export default function DisplayView() {
       <AccessScreen
         isSpeaking={isSpeaking}
         amplitudeRef={amplitudeRef}
-        speak={speak}
-        voiceSettings={DEFAULT_VOICE_SETTINGS}
+        speakDemo={speakDemo}
         onUnlock={() => {
           localStorage.setItem("magalu_authed", "1");
           setAuthed(true);
