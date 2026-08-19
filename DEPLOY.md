@@ -25,8 +25,9 @@ no backend e preenche `ALLOWED_ORIGIN`.**
 1. No Render, **New +** → **Web Service** → conecte o repositório do GitHub.
 2. Configurações do serviço:
    - **Root Directory**: `server`
-   - **Build Command**: `npm install`
+   - **Build Command**: `npm install` (o Render pode sugerir `yarn` sozinho — troque pra `npm install`)
    - **Start Command**: `npm start`
+   - **Health Check Path**: `/api/health`
    - **Instance Type**: Free
 3. Em **Environment**, adicione as variáveis:
 
@@ -64,7 +65,8 @@ no backend e preenche `ALLOWED_ORIGIN`.**
 ## 2. Frontend no Vercel
 
 1. No Vercel, **Add New** → **Project** → importe o mesmo repositório.
-2. **Root Directory**: `frontend`.
+2. **Root Directory**: deixe `./` (o front-end fica na raiz do repositório —
+   não precisa mudar nada aqui). O Vercel deve detectar "Vite" sozinho.
 3. Em **Environment Variables**, adicione:
 
    | Variável | Valor |
@@ -140,7 +142,7 @@ ALLOWED_ORIGIN=
 PORT=3001
 ```
 
-### `frontend/.env` (Vercel)
+### `.env` na raiz (Vercel)
 
 ```
 VITE_API_URL=

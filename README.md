@@ -8,9 +8,11 @@ nativa do navegador) e Groq (LLM gratuito e rápido) via um backend Node/Express
 
 ```
 apresenta/
-  frontend/   -> App React + Three.js (avatar 3D, mic, fala) — deploy no Vercel
-  server/     -> API Node/Express que consulta a Groq com o conteúdo de CX Preditivo — deploy no Render
+  src/, public/, index.html, package.json  -> App React + Three.js (avatar 3D, mic, fala) — deploy no Vercel (raiz do repositório)
+  server/                                  -> API Node/Express que consulta a Groq com o conteúdo de CX Preditivo — deploy no Render
 ```
+
+O front-end fica na **raiz** do repositório (não numa subpasta) — assim o Vercel detecta o projeto Vite automaticamente, sem precisar configurar "Root Directory". Só o backend fica isolado em `server/`.
 
 ## 1. Rodando localmente
 
@@ -56,10 +58,9 @@ requisição, sem precisar mexer no `.env` nem reiniciar o backend.
 
 ### Frontend
 
-Em outro terminal:
+Em outro terminal, a partir da raiz do repositório:
 
 ```bash
-cd frontend
 cp .env.example .env   # aponta para http://localhost:3001 por padrão
 npm run dev
 ```
@@ -136,7 +137,8 @@ cota atual em https://cloud.google.com/text-to-speech/pricing.
 
 ### Frontend no Vercel
 
-1. Importe o mesmo repositório no Vercel, selecionando a pasta `frontend/` como raiz do projeto.
+1. Importe o mesmo repositório no Vercel — o front-end fica na raiz do repositório,
+   então não precisa configurar "Root Directory" (deixe `./`).
 2. Em Environment Variables, adicione `VITE_API_URL` com a URL do backend no Render.
 3. Deploy. O Vercel detecta automaticamente o projeto Vite (`npm run build`, saída em `dist/`).
 4. Volte no Render e confira se `ALLOWED_ORIGIN` bate exatamente com a URL que o
@@ -160,6 +162,6 @@ copiando a URL pública do backend — precisa primeiro passar pelo código.
 
 ## 5. Personalizações rápidas
 
-- Trocar as perguntas sugeridas: `frontend/src/App.jsx` → array `SUGGESTIONS`.
+- Trocar as perguntas sugeridas: `src/App.jsx` → array `SUGGESTIONS`.
 - Ajustar tom/estilo das respostas: `server/knowledge.js` → `SYSTEM_CONTEXT`.
-- Trocar a cor de pele/textura do avatar procedural: `frontend/src/utils/skinTexture.js`.
+- Trocar a cor de pele/textura do avatar procedural: `src/utils/skinTexture.js`.

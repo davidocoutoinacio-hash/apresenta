@@ -3,6 +3,11 @@
 .DS_Store
 *.log
 
+node_modules
+dist
+dist-ssr
+*.local
+
 # Segurança extra: nenhum .env deve ser versionado, em nenhuma pasta do projeto
 # (cada subpasta já tem seu próprio .gitignore cobrindo isso também).
 .env
