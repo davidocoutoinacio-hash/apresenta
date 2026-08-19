@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useRef } from "react";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
@@ -28,6 +28,13 @@ export default function Scene({
   const isJarvis = !effectiveUrl && avatarMode === "jarvis";
   const controlsRef = useRef();
   const jarvisTarget = [0, 1.5, 0];
+  // Reconstrói o <Canvas> do zero quando o navegador perde o contexto WebGL
+  // (comum em notebooks com GPU mais fraca depois de rodar a animação 3D por um
+  // tempo, ainda mais compartilhando tela numa chamada). Sem isso o canvas fica
+  // preto pro resto da sessão — a voz continua funcionando normalmente porque
+  // não depende do WebGL, o que dá a falsa impressão de "travou mas responde".
+  const [canvasKey, setCanvasKey] = useState(0);
+  const contextLostTimerRef = useRef(null);
   const avatarTarget = [0, 0.8, 0];
 
   // Sempre que o avatar exibido muda (troca de modo, ou troca de modelo 3D
@@ -51,7 +58,23 @@ export default function Scene({
   }, [isJarvis, effectiveUrl]);
 
   return (
-    <Canvas shadows camera={{ position: [0, 1.6, 2.6], fov: 35 }}>
+    <Canvas
+      key={canvasKey}
+      shadows
+      camera={{ position: [0, 1.6, 2.6], fov: 35 }}
+      onCreated={({ gl }) => {
+        const canvas = gl.domElement;
+        canvas.addEventListener("webglcontextlost", (event) => {
+          // preventDefault avisa o navegador que vamos cuidar da recuperação —
+          // sem isso o contexto fica perdido para sempre. Damos um respiro antes
+          // de recriar pra não entrar num loop apertado se o problema persistir.
+          event.preventDefault();
+          console.warn("[Scene] Contexto WebGL perdido, recriando a cena…");
+          clearTimeout(contextLostTimerRef.current);
+          contextLostTimerRef.current = setTimeout(() => setCanvasKey((k) => k + 1), 500);
+        });
+      }}
+    >
       <color attach="background" args={["#182338"]} />
       <fog attach="fog" args={["#182338", 3, 8]} />
       <ambientLight intensity={0.7} />

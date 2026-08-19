@@ -5,6 +5,7 @@ import ScriptPanel from "./components/ScriptPanel";
 import AccessScreen from "./components/AccessScreen";
 import SpeakingBubble from "./components/SpeakingBubble";
 import DisplayView from "./components/DisplayView";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { useVoice } from "./hooks/useVoice";
 import { useNeuralVoice } from "./hooks/useNeuralVoice";
 import { useVoiceSettings } from "./hooks/useVoiceSettings";
@@ -292,14 +293,16 @@ export default function App() {
         </div>
       ) : (
         <div className="scene-wrap">
-          <Scene
-            avatarUrl={avatarUrl}
-            avatarMode={avatarMode}
-            glbModel={glbModel}
-            isSpeaking={isSpeaking}
-            isListening={isListening}
-            amplitudeRef={amplitudeRef}
-          />
+          <ErrorBoundary>
+            <Scene
+              avatarUrl={avatarUrl}
+              avatarMode={avatarMode}
+              glbModel={glbModel}
+              isSpeaking={isSpeaking}
+              isListening={isListening}
+              amplitudeRef={amplitudeRef}
+            />
+          </ErrorBoundary>
         </div>
       )}
 

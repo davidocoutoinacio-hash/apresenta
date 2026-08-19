@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import Scene from "./Scene";
+import ErrorBoundary from "./ErrorBoundary";
 import { ROGERIA_ACCESS_PHRASES } from "../rogeriaPhrases";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -60,13 +61,15 @@ export default function AccessScreen({ isSpeaking, amplitudeRef, speakDemo, onUn
       <div className="brand-bar brand-bar-top" />
       <div className="brand-bar brand-bar-bottom" />
       <div className="scene-wrap">
-        <Scene
-          avatarMode="jarvis"
-          isSpeaking={isSpeaking}
-          isListening={false}
-          amplitudeRef={amplitudeRef}
-          onAvatarActivate={handleAvatarActivate}
-        />
+        <ErrorBoundary>
+          <Scene
+            avatarMode="jarvis"
+            isSpeaking={isSpeaking}
+            isListening={false}
+            amplitudeRef={amplitudeRef}
+            onAvatarActivate={handleAvatarActivate}
+          />
+        </ErrorBoundary>
       </div>
 
       <div className="access-content">

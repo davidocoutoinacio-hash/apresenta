@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Scene from "./Scene";
+import ErrorBoundary from "./ErrorBoundary";
 import SpeakingBubble from "./SpeakingBubble";
 import AccessScreen from "./AccessScreen";
 import { useNeuralVoice } from "../hooks/useNeuralVoice";
@@ -90,14 +91,16 @@ export default function DisplayView() {
       <div className="brand-bar brand-bar-top" />
       <div className="brand-bar brand-bar-bottom" />
       <div className="scene-wrap">
-        <Scene
-          avatarUrl={avatarConfig.avatarUrl}
-          avatarMode={avatarConfig.avatarMode}
-          glbModel={avatarConfig.glbModel}
-          isSpeaking={isSpeaking}
-          isListening={false}
-          amplitudeRef={amplitudeRef}
-        />
+        <ErrorBoundary>
+          <Scene
+            avatarUrl={avatarConfig.avatarUrl}
+            avatarMode={avatarConfig.avatarMode}
+            glbModel={avatarConfig.glbModel}
+            isSpeaking={isSpeaking}
+            isListening={false}
+            amplitudeRef={amplitudeRef}
+          />
+        </ErrorBoundary>
       </div>
       <SpeakingBubble
         visible={isSpeaking && !(!avatarConfig.avatarUrl && avatarConfig.avatarMode === "jarvis")}
