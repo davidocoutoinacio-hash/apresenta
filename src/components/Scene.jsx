@@ -94,8 +94,6 @@ export default function Scene({
         ref={controlsRef}
         target={isJarvis ? jarvisTarget : avatarTarget}
         enablePan={!isJarvis}
-        enableRotate={!isJarvis}
-        enableZoom={!isJarvis}
         screenSpacePanning={!isJarvis}
         minDistance={isJarvis ? 1.6 : 1.2}
         maxDistance={isJarvis ? 4 : 6}
